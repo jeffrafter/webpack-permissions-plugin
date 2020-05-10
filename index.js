@@ -1,5 +1,4 @@
 const fs = require('fs');
-const FileHound = require('filehound');
 
 const pluginName = 'WebpackPermissionsPlugin';
 
@@ -16,7 +15,7 @@ function PermissionsOutputPlugin(options) {
   this.options = options;
 }
 
-PermissionsOutputPlugin.prototype.apply = function(compiler) {
+PermissionsOutputPlugin.prototype.apply = function (compiler) {
   const changeFilePermissions = () => {
     const logger =
       compiler.getInfrastructureLogger &&
@@ -29,24 +28,10 @@ PermissionsOutputPlugin.prototype.apply = function(compiler) {
           warn(logger, path);
           return;
         }
-
-        const dirs = FileHound.create()
-          .path(path)
-          .directory()
-          .findSync();
-        const files = FileHound.create()
-          .path(path)
-          .not()
-          .directory()
-          .findSync();
-        for (const di of dirs) {
-          if (fs.existsSync(di)) {
-            fs.chmodSync(di, dir.dirMode || 0o644);
-          }
-        }
+        const files = fs.readdirSync(path)
         for (const fi of files) {
-          if (fs.existsSync(fi)) {
-            fs.chmodSync(fi, dir.fileMode || 0o755);
+          if (fs.existsSync(path + '/' + fi)) {
+            fs.chmodSync(path + '/' + fi, dir.fileMode || 0o755);
           }
         }
       }
